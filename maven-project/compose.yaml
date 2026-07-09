@@ -1,0 +1,73 @@
+services:
+  resource-db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${RESOURCE_SERVICE_DATABASE}
+      POSTGRES_USER: ${RESOURCE_SERVICE_DATASOURCE_USERNAME}
+      POSTGRES_PASSWORD: ${RESOURCE_SERVICE_DATASOURCE_PASSWORD}
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+    volumes:
+      - ./init-scripts/resource-db/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  song-db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${SONG_SERVICE_DATABASE}
+      POSTGRES_USER: ${SONG_SERVICE_DATASOURCE_USERNAME}
+      POSTGRES_PASSWORD: ${SONG_SERVICE_DATASOURCE_PASSWORD}
+    ports:
+      - "5433:5432"
+    env_file:
+      - .env
+    volumes:
+      - ./init-scripts/song-db/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  resource-service:
+    build:
+      context: .
+      dockerfile: ./resource-service/Dockerfile
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    depends_on:
+      - resource-db
+      - song-service
+      - eureka-server
+
+  song-service:
+    build:
+      context: .
+      dockerfile: ./song-service/Dockerfile
+    ports:
+      - "8081-8082:8081"
+    env_file:
+      - .env
+    depends_on:
+      - song-db
+      - eureka-server
+
+  eureka-server:
+    build:
+      context: .
+      dockerfile: ./eureka-server/Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "8761:8761"
+
+  gateway-service:
+    build:
+      context: .
+      dockerfile: ./gateway-service/Dockerfile
+    ports:
+      - "8085:8085"
+    env_file:
+      - .env
+    depends_on:
+      - eureka-server
+      - resource-service
+      - song-service
