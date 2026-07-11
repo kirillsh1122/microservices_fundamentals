@@ -22,7 +22,7 @@ public class Resource {
 //    @Column(name = "DATA")
 //    private byte[] data;
 
-    @Column(name = "DATA")
+    @Column(name = "RESOURCE_URL")
     private String resourceURL;
 
 }

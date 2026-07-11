@@ -1,7 +1,10 @@
 package com.microservice.architecture.overview.resource_service.service;
 
+import java.io.InputStream;
+
 public interface BlobResourceService {
 
-    String uploadResource(byte[] data) throws java.io.IOException, org.apache.tika.exception.TikaException, org.xml.sax.SAXException;
-    byte[] getResourceByURL(String resourceURL) throws java.io.IOException;
+    String uploadResource(byte[] data, String fileName);
+    byte[] getResourceByURL(String resourceURL);
+    void deleteResourceByURL(String resourceURL);
 }

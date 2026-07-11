@@ -2,6 +2,7 @@ package com.microservice.architecture.overview.resource_service.controller;
 
 import java.util.List;
 
+import com.microservice.architecture.overview.resource_service.service.BlobResourceServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -29,12 +30,15 @@ public class ResourceController{
     @Autowired
     private ResourceService resourceService;
 
+    @Autowired
+    private BlobResourceServiceImpl blobResourceService;
+
     @GetMapping(value = "/{id}", produces = "audio/mpeg")
     public ResponseEntity<byte[]> getResourceById(@PathVariable("id") long resourceId) {
         return resourceService.getResourceById(resourceId)
                 .map(resource -> ResponseEntity.ok()
                         .contentType(MediaType.valueOf("audio/mpeg"))
-                        .body(resource.getData()))
+                        .body(blobResourceService.getResourceByURL(resource.getResourceURL())))
                 .orElseThrow(() -> new ResourceNotFoundException("Resource with ID=X not found".replace("X", String.valueOf(resourceId))));
     }
 

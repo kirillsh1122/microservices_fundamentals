@@ -3,6 +3,7 @@ package com.microservice.architecture.overview.resource_service.service;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,7 +39,7 @@ public class ResourceServiceImpl implements ResourceService {
         
         Metadata metadata = SongMetadataParser.extractMetadata(data);
         Resource resource = new Resource();
-        String resourceURL = blobResourceService.uploadResource(data);
+        String resourceURL = blobResourceService.uploadResource(data, metadata.get("dc:title")+ UUID.randomUUID() +".mp3");
         resource.setResourceURL(resourceURL);
         resource = resourceRepository.save(resource);
 
@@ -55,6 +56,7 @@ public class ResourceServiceImpl implements ResourceService {
             songServiceClient.createSongMetadata(songMetadata);
         } catch (FeignException.BadRequest e) {
             resourceRepository.deleteById(resource.getId());
+            blobResourceService.deleteResourceByURL(resourceURL);
             throw new SongMetadataPostException("Failed to post song metadata for ID=" + resource.getId() + ": " + e.contentUTF8());
         }
 
@@ -101,6 +103,9 @@ public class ResourceServiceImpl implements ResourceService {
                 .filter(resourceRepository::existsById)
                 .toList();
 
+        resourceRepository.findAllById(deletedIds).forEach(resource -> {
+            blobResourceService.deleteResourceByURL(resource.getResourceURL());
+        });
         resourceRepository.deleteAllById(deletedIds);
         songServiceClient.deleteSongMetadata(resourceIds);
         return deletedIds;
