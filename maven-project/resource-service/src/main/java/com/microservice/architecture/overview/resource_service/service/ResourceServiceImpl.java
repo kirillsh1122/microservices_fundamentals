@@ -30,13 +30,16 @@ public class ResourceServiceImpl implements ResourceService {
     @Autowired
     private SongServiceClient songServiceClient;
 
+    @Autowired
+    private BlobResourceServiceImpl blobResourceService;
+
     @Override
     public Resource createResource(byte[] data) throws java.io.IOException, org.apache.tika.exception.TikaException, org.xml.sax.SAXException {
         
         Metadata metadata = SongMetadataParser.extractMetadata(data);
-        
         Resource resource = new Resource();
-        resource.setData(data);
+        String resourceURL = blobResourceService.uploadResource(data);
+        resource.setResourceURL(resourceURL);
         resource = resourceRepository.save(resource);
 
         SongDTO songMetadata = new SongDTO(

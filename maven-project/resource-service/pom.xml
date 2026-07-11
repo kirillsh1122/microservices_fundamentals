@@ -68,6 +68,14 @@
 			<artifactId>tika-parsers-standard-package</artifactId>
 			<version>3.3.1</version>
 		</dependency>
+		<dependency>
+			<groupId>com.azure.spring</groupId>
+			<artifactId>spring-cloud-azure-starter-storage-blob</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.azure</groupId>
+			<artifactId>azure-identity</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
