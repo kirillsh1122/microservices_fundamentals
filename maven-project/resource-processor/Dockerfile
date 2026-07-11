@@ -1,5 +1,6 @@
 FROM maven:4.0.0-rc-5-eclipse-temurin-21-alpine AS build
 WORKDIR /app
+COPY pom.xml .
 COPY resource-processor/pom.xml resource-processor/pom.xml
 RUN mvn -f resource-processor/pom.xml dependency:go-offline
 COPY resource-processor/src resource-processor/src
