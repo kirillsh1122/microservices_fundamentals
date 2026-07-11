@@ -2,7 +2,7 @@ package com.microservice.architecture.overview.resource_service.controller;
 
 import java.util.List;
 
-import com.microservice.architecture.overview.resource_service.service.BlobResourceServiceImpl;
+import com.microservice.architecture.overview.resource_service.service.BlobResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -31,7 +31,7 @@ public class ResourceController{
     private ResourceService resourceService;
 
     @Autowired
-    private BlobResourceServiceImpl blobResourceService;
+    private BlobResourceService blobResourceService;
 
     @GetMapping(value = "/{id}", produces = "audio/mpeg")
     public ResponseEntity<byte[]> getResourceById(@PathVariable("id") long resourceId) {

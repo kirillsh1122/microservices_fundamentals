@@ -40,6 +40,7 @@ services:
     depends_on:
       - resource-db
       - song-service
+      - resource-processor
       - eureka-server
 
   song-service:
@@ -52,6 +53,17 @@ services:
       - .env
     depends_on:
       - song-db
+      - eureka-server
+
+  resource-processor:
+    build:
+      context: .
+      dockerfile: ./resource-processor/Dockerfile
+    ports:
+      - "8087:8087"
+    env_file:
+      - .env
+    depends_on:
       - eureka-server
 
   eureka-server:

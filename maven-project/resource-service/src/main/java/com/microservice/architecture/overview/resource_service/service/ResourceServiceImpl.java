@@ -17,6 +17,7 @@ import com.microservice.architecture.overview.resource_service.utils.SongMetadat
 import feign.FeignException;
 
 import com.microservice.architecture.overview.resource_service.client.SongServiceClient;
+import com.microservice.architecture.overview.resource_service.client.ResourceProcessorClient;
 import com.microservice.architecture.overview.resource_service.dto.SongDTO;
 import com.microservice.architecture.overview.resource_service.exception.InvalidIdException;
 import com.microservice.architecture.overview.resource_service.exception.SongMetadataPostException;
@@ -32,6 +33,9 @@ public class ResourceServiceImpl implements ResourceService {
     private SongServiceClient songServiceClient;
 
     @Autowired
+    private ResourceProcessorClient resourceProcessorClient;
+
+    @Autowired
     private BlobResourceServiceImpl blobResourceService;
 
     @Override
@@ -39,7 +43,7 @@ public class ResourceServiceImpl implements ResourceService {
         
         Metadata metadata = SongMetadataParser.extractMetadata(data);
         Resource resource = new Resource();
-        String resourceURL = blobResourceService.uploadResource(data, metadata.get("dc:title")+ UUID.randomUUID() +".mp3");
+        String resourceURL = blobResourceService.uploadResource(data, metadata.get("dc:title") + "-" + UUID.randomUUID() + ".mp3");
         resource.setResourceURL(resourceURL);
         resource = resourceRepository.save(resource);
 
@@ -54,6 +58,7 @@ public class ResourceServiceImpl implements ResourceService {
 
         try {
             songServiceClient.createSongMetadata(songMetadata);
+            resourceProcessorClient.processResource(data);
         } catch (FeignException.BadRequest e) {
             resourceRepository.deleteById(resource.getId());
             blobResourceService.deleteResourceByURL(resourceURL);
