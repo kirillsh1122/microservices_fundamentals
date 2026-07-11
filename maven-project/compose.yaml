@@ -29,6 +29,10 @@ services:
     build:
       context: .
       dockerfile: ./resource-service/Dockerfile
+    environment:
+      AZURE_CLIENT_ID: ${AZURE_CLIENT_ID}
+      AZURE_CLIENT_SECRET: ${AZURE_CLIENT_SECRET}
+      AZURE_TENANT_ID: ${AZURE_TENANT_ID}
     ports:
       - "8080:8080"
     env_file:
