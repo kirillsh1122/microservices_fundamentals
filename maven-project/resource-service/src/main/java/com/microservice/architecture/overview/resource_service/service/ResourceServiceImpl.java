@@ -3,6 +3,7 @@ package com.microservice.architecture.overview.resource_service.service;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import com.microservice.architecture.overview.resource_service.utils.SongMetadat
 import feign.FeignException;
 
 import com.microservice.architecture.overview.resource_service.client.SongServiceClient;
+import com.microservice.architecture.overview.resource_service.client.ResourceProcessorClient;
 import com.microservice.architecture.overview.resource_service.dto.SongDTO;
 import com.microservice.architecture.overview.resource_service.exception.InvalidIdException;
 import com.microservice.architecture.overview.resource_service.exception.SongMetadataPostException;
@@ -30,13 +32,19 @@ public class ResourceServiceImpl implements ResourceService {
     @Autowired
     private SongServiceClient songServiceClient;
 
+    @Autowired
+    private ResourceProcessorClient resourceProcessorClient;
+
+    @Autowired
+    private BlobResourceServiceImpl blobResourceService;
+
     @Override
     public Resource createResource(byte[] data) throws java.io.IOException, org.apache.tika.exception.TikaException, org.xml.sax.SAXException {
         
         Metadata metadata = SongMetadataParser.extractMetadata(data);
-        
         Resource resource = new Resource();
-        resource.setData(data);
+        String resourceURL = blobResourceService.uploadResource(data, metadata.get("dc:title") + "-" + UUID.randomUUID() + ".mp3");
+        resource.setResourceURL(resourceURL);
         resource = resourceRepository.save(resource);
 
         SongDTO songMetadata = new SongDTO(
@@ -50,8 +58,10 @@ public class ResourceServiceImpl implements ResourceService {
 
         try {
             songServiceClient.createSongMetadata(songMetadata);
+            resourceProcessorClient.processResource(data);
         } catch (FeignException.BadRequest e) {
             resourceRepository.deleteById(resource.getId());
+            blobResourceService.deleteResourceByURL(resourceURL);
             throw new SongMetadataPostException("Failed to post song metadata for ID=" + resource.getId() + ": " + e.contentUTF8());
         }
 
@@ -98,6 +108,9 @@ public class ResourceServiceImpl implements ResourceService {
                 .filter(resourceRepository::existsById)
                 .toList();
 
+        resourceRepository.findAllById(deletedIds).forEach(resource -> {
+            blobResourceService.deleteResourceByURL(resource.getResourceURL());
+        });
         resourceRepository.deleteAllById(deletedIds);
         songServiceClient.deleteSongMetadata(resourceIds);
         return deletedIds;

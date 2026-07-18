@@ -1,6 +1,7 @@
 package com.microservice.architecture.overview.resource_service.exception.handler;
 
 
+import com.microservice.architecture.overview.resource_service.exception.AzureBlobStorageException;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -98,6 +99,16 @@ public class ResourceServiceGlobalExceptionHandler extends ResponseEntityExcepti
 
     @ExceptionHandler(SongMetadataPostException.class)
     public ResponseEntity<ErrorResponse> handleSongMetadataPost(SongMetadataPostException ex) {
+
+        ErrorResponse error = new ErrorResponse(ex.getMessage(), "400");
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(error);
+    }
+
+    @ExceptionHandler(AzureBlobStorageException.class)
+    public ResponseEntity<ErrorResponse> handleAzureBlobStorage(AzureBlobStorageException ex) {
 
         ErrorResponse error = new ErrorResponse(ex.getMessage(), "400");
 

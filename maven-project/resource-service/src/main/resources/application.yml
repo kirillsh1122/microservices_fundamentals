@@ -1,0 +1,32 @@
+server:
+  port: ${RESOURCE_SERVICE_SERVER_PORT:8082}
+
+spring:
+  application:
+    name: resource-service
+  datasource:
+    url: ${RESOURCE_SERVICE_DATASOURCE_URL:jdbc:postgresql://localhost:5432/resource-db}
+    username: ${RESOURCE_SERVICE_DATASOURCE_USERNAME:postgres}
+    password: ${RESOURCE_SERVICE_DATASOURCE_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: ${DDL_AUTO:update}
+  cloud:
+    azure:
+      credential:
+        client-id: ${AZURE_CLIENT_ID}
+        client-secret: ${AZURE_CLIENT_SECRET}
+      profile:
+        tenant-id: ${AZURE_TENANT_ID}
+      storage:
+        blob:
+          account-name: microservstorageaccksh
+          container-name: resource
+          endpoint: ${AZURE_STORAGE_BLOB_ENDPOINT:https://microservstorageaccksh.blob.core.windows.net/}
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: ${EUREKA_SERVER_SERVICE_URL:http://localhost:8761/eureka/}

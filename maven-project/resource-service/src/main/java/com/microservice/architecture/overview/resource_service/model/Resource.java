@@ -19,7 +19,10 @@ public class Resource {
     @Column(name = "ID")
     private Long id;
     
-    @Column(name = "DATA")
-    private byte[] data;
+//    @Column(name = "DATA")
+//    private byte[] data;
+
+    @Column(name = "RESOURCE_URL")
+    private String resourceURL;
 
 }
