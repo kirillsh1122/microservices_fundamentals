@@ -3,6 +3,7 @@ package com.microservice.architecture.overview.resource_service.controller;
 import java.util.List;
 
 import com.microservice.architecture.overview.resource_service.service.BlobResourceService;
+import com.microservice.architecture.overview.resource_service.service.ResourceMessagingService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -33,6 +34,9 @@ public class ResourceController{
     @Autowired
     private BlobResourceService blobResourceService;
 
+    @Autowired
+    private ResourceMessagingService resourceMessagingService;
+
     @GetMapping(value = "/{id}", produces = "audio/mpeg")
     public ResponseEntity<byte[]> getResourceById(@PathVariable("id") long resourceId) {
         return resourceService.getResourceById(resourceId)
@@ -45,6 +49,7 @@ public class ResourceController{
     @PostMapping(consumes = "audio/mpeg")
     public ResponseEntity<ResourceIdResponse> createResource(@RequestBody byte[] data) throws java.io.IOException, org.apache.tika.exception.TikaException, org.xml.sax.SAXException {
         Resource savedResource = resourceService.createResource(data);
+        resourceMessagingService.sendResourceCreatedMessage(savedResource.getId());
         return ResponseEntity.ok(new ResourceIdResponse(savedResource.getId()));
     }
 

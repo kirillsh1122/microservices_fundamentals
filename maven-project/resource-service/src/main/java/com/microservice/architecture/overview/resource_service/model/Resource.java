@@ -18,9 +18,6 @@ public class Resource {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
     private Long id;
-    
-//    @Column(name = "DATA")
-//    private byte[] data;
 
     @Column(name = "RESOURCE_URL")
     private String resourceURL;
