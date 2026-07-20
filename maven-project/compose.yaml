@@ -1,6 +1,7 @@
 networks:
   kafka-net:
-    external: true
+    external:
+      name: maven-project_kafka-net
 
 services:
   resource-db:
