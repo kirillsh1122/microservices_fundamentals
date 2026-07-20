@@ -1,7 +1,8 @@
 networks:
+  default:
   kafka-net:
-    external:
-      name: maven-project_kafka-net
+    external: true
+    name: kafka-net
 
 services:
   resource-db:
@@ -44,7 +45,7 @@ services:
       - .env
     networks:
         - kafka-net
-        - bridge
+        - default
     depends_on:
       - resource-db
       - song-service
@@ -73,7 +74,7 @@ services:
       - .env
     networks:
       - kafka-net
-      - bridge
+      - default
     depends_on:
       - eureka-server
 
