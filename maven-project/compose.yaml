@@ -44,7 +44,7 @@ services:
       - .env
     networks:
         - kafka-net
-        - default
+        - bridge
     depends_on:
       - resource-db
       - song-service
@@ -73,7 +73,7 @@ services:
       - .env
     networks:
       - kafka-net
-      - default
+      - bridge
     depends_on:
       - eureka-server
 
