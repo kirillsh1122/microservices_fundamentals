@@ -1,3 +1,9 @@
+networks:
+  default:
+  kafka-net:
+    external: true
+    name: kafka-net
+
 services:
   resource-db:
     image: postgres:17-alpine
@@ -37,6 +43,9 @@ services:
       - "8080:8080"
     env_file:
       - .env
+    networks:
+        - kafka-net
+        - default
     depends_on:
       - resource-db
       - song-service
@@ -63,6 +72,9 @@ services:
       - "8087:8087"
     env_file:
       - .env
+    networks:
+      - kafka-net
+      - default
     depends_on:
       - eureka-server
 

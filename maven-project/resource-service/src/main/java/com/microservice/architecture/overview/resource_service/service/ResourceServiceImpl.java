@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,16 +14,10 @@ import org.apache.tika.metadata.Metadata;
 import com.microservice.architecture.overview.resource_service.model.Resource;
 import com.microservice.architecture.overview.resource_service.repository.ResourceRepository;
 import com.microservice.architecture.overview.resource_service.utils.SongMetadataParser;
-
-import feign.FeignException;
-
 import com.microservice.architecture.overview.resource_service.client.SongServiceClient;
-import com.microservice.architecture.overview.resource_service.client.ResourceProcessorClient;
-import com.microservice.architecture.overview.resource_service.dto.SongDTO;
 import com.microservice.architecture.overview.resource_service.exception.InvalidIdException;
-import com.microservice.architecture.overview.resource_service.exception.SongMetadataPostException;
 
-
+@Slf4j
 @Service
 public class ResourceServiceImpl implements ResourceService {
 
@@ -33,10 +28,7 @@ public class ResourceServiceImpl implements ResourceService {
     private SongServiceClient songServiceClient;
 
     @Autowired
-    private ResourceProcessorClient resourceProcessorClient;
-
-    @Autowired
-    private BlobResourceServiceImpl blobResourceService;
+    private BlobResourceService blobResourceService;
 
     @Override
     public Resource createResource(byte[] data) throws java.io.IOException, org.apache.tika.exception.TikaException, org.xml.sax.SAXException {
@@ -46,24 +38,7 @@ public class ResourceServiceImpl implements ResourceService {
         String resourceURL = blobResourceService.uploadResource(data, metadata.get("dc:title") + "-" + UUID.randomUUID() + ".mp3");
         resource.setResourceURL(resourceURL);
         resource = resourceRepository.save(resource);
-
-        SongDTO songMetadata = new SongDTO(
-            resource.getId(), 
-            metadata.get("dc:title"), 
-            metadata.get("xmpDM:artist"), 
-            metadata.get("xmpDM:album"), 
-            formatDuration(metadata.get("xmpDM:duration")), 
-            metadata.get("xmpDM:releaseDate")
-        );
-
-        try {
-            songServiceClient.createSongMetadata(songMetadata);
-            resourceProcessorClient.processResource(data);
-        } catch (FeignException.BadRequest e) {
-            resourceRepository.deleteById(resource.getId());
-            blobResourceService.deleteResourceByURL(resourceURL);
-            throw new SongMetadataPostException("Failed to post song metadata for ID=" + resource.getId() + ": " + e.contentUTF8());
-        }
+        log.info("Resource created with ID: {} and URL: {}", resource.getId(), resource.getResourceURL());
 
         return resource;
     }
@@ -113,22 +88,8 @@ public class ResourceServiceImpl implements ResourceService {
         });
         resourceRepository.deleteAllById(deletedIds);
         songServiceClient.deleteSongMetadata(resourceIds);
+        log.info("Cascade deleted resources with IDs: {}", deletedIds);
+
         return deletedIds;
-
     }
-
-    private String formatDuration(String durationSeconds) {
-        if (durationSeconds == null || durationSeconds.isEmpty()) {
-            return "00:00";
-        }
-        try {
-            double seconds = Double.parseDouble(durationSeconds);
-            int minutes = (int) seconds / 60;
-            int secs = (int) seconds % 60;
-            return String.format("%02d:%02d", minutes, secs);
-        } catch (NumberFormatException e) {
-            return "00:00";
-        }
-    }
-
 }

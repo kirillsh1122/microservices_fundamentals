@@ -26,6 +26,13 @@
         <spring-cloud.version>2025.0.0</spring-cloud.version>
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.retry</groupId>
+            <artifactId>spring-retry</artifactId>
+        </dependency>
+    </dependencies>
+
     <dependencyManagement>
         <!-- optional: shared dependency versions -->
         <dependencies>

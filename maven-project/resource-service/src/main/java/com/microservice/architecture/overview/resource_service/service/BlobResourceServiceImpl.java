@@ -10,6 +10,8 @@ import com.azure.storage.blob.models.BlobStorageException;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -24,6 +26,11 @@ public class BlobResourceServiceImpl implements BlobResourceService {
     @Autowired
     private BlobContainerClient blobContainerClient;
 
+    @Retryable(
+            retryFor = {AzureBlobStorageException.class},
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 1000, multiplier = 2)
+    )
     @Override
     public String uploadResource(byte[] data, String fileName) {
         log.debug("Uploading resource. fileName: {}, dataSize: {} bytes", fileName, data.length);
@@ -42,6 +49,11 @@ public class BlobResourceServiceImpl implements BlobResourceService {
         }
     }
 
+    @Retryable(
+            retryFor = {AzureBlobStorageException.class},
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 1000, multiplier = 2)
+    )
     @Override
     public byte[] getResourceByURL(String resourceURL) {
         log.debug("Retrieving resource. URL: {}", resourceURL);
@@ -62,6 +74,11 @@ public class BlobResourceServiceImpl implements BlobResourceService {
         }
     }
 
+    @Retryable(
+            retryFor = {AzureBlobStorageException.class},
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 1000, multiplier = 2)
+    )
     @Override
     public void deleteResourceByURL(String resourceURL) {
         log.debug("Deleting resource. URL: {}", resourceURL);

@@ -4,6 +4,13 @@ server:
 spring:
   application:
     name: resource-processor
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: ${RESOURCE_PROCESSOR_KAFKA_CONSUMER_GROUP_ID:resource-processor-group}
+      auto-offset-reset: earliest
+      key-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
 
 eureka:
   client:
