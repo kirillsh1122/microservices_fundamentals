@@ -7,6 +7,7 @@ COPY resource-service/src resource-service/src
 RUN mvn -f resource-service/pom.xml clean package -Dmaven.test.skip=true
 
 FROM eclipse-temurin:21-jre-alpine-3.23
+RUN apk add --no-cache curl
 WORKDIR /resource-service
 COPY --from=build /app/resource-service/target/*.jar resource-service.jar
 EXPOSE 8080
