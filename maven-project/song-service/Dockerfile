@@ -7,6 +7,7 @@ COPY song-service/src song-service/src
 RUN mvn -f song-service/pom.xml clean package -Dmaven.test.skip=true
 
 FROM eclipse-temurin:21-jre-alpine-3.23
+RUN apk add --no-cache curl
 WORKDIR /song-service
 COPY --from=build app/song-service/target/*.jar song-service.jar
 EXPOSE 8081
