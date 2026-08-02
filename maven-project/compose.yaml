@@ -58,8 +58,8 @@ services:
         - default
     healthcheck:
       test: [ "CMD", "curl", "--silent", "--fail", "http://localhost:8080/actuator/health" ]
-      interval: 5s
-      timeout: 5s
+      interval: 10s
+      timeout: 10s
       retries: 5
       start_period: 40s
     depends_on:
@@ -82,8 +82,8 @@ services:
       - .env
     healthcheck:
       test: [ "CMD", "curl", "--silent", "--fail", "http://localhost:8081/actuator/health" ]
-      interval: 5s
-      timeout: 5s
+      interval: 10s
+      timeout: 10s
       retries: 5
       start_period: 40s
     depends_on:
@@ -105,8 +105,8 @@ services:
       - default
     healthcheck:
       test: [ "CMD", "curl", "--silent", "--fail", "http://localhost:8087/actuator/health" ]
-      interval: 5s
-      timeout: 5s
+      interval: 10s
+      timeout: 10s
       retries: 5
       start_period: 40s
     depends_on:
