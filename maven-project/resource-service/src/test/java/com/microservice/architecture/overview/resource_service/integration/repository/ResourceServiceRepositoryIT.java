@@ -4,6 +4,7 @@ package com.microservice.architecture.overview.resource_service.integration.repo
 import com.microservice.architecture.overview.resource_service.model.Resource;
 import com.microservice.architecture.overview.resource_service.repository.ResourceRepository;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
