@@ -8,7 +8,6 @@ import com.microservice.architecture.overview.resource_service.repository.Resour
 import com.microservice.architecture.overview.resource_service.service.BlobResourceServiceImpl;
 import com.microservice.architecture.overview.resource_service.service.ResourceMessagingServiceImpl;
 import com.microservice.architecture.overview.resource_service.service.ResourceServiceImpl;
-import org.apache.tika.exception.TikaException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
@@ -19,8 +18,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -32,7 +31,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.utility.DockerImageName;
 import org.testcontainers.utility.MountableFile;
-import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,6 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
         classes = {ResourceServiceComponent.ResourceConfig.class, AzureBlobConfiguration.class},
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWebTestClient
+@DirtiesContext
 @Testcontainers
 public class ResourceServiceComponent {
 
@@ -102,7 +101,7 @@ public class ResourceServiceComponent {
     private WebTestClient webTestClient;
 
     @Test
-    public void testCreateResource() throws IOException, TikaException, SAXException {
+    public void testCreateResource() throws IOException {
 
         byte[] data;
 

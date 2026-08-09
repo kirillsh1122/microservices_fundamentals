@@ -124,6 +124,11 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-contract-verifier</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webflux</artifactId>
 			<scope>test</scope>
@@ -206,12 +211,26 @@
 					<includes>
 						<include>**/*IT.java</include>
 						<include>**/*Tests.java</include>
+						<include>**/*Test.java</include>
+						<include>**/*Component.java</include>
 					</includes>
 					<environmentVariables>
 						<DOCKER_HOST>tcp://192.168.1.103:2375</DOCKER_HOST>
 					</environmentVariables>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-contract-maven-plugin</artifactId>
+				<version>4.3.0</version>
+				<extensions>true</extensions>
+				<configuration>
+					<testFramework>JUNIT5</testFramework>
+					<baseClassForTests>com.microservice.architecture.overview.resource_service.contract.ResourceServiceBaseContractClass</baseClassForTests>
+					<httpPort>8888</httpPort>
+				</configuration>
+			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
