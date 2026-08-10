@@ -7,7 +7,7 @@ spring:
     password: "${SONG_SERVICE_DATASOURCE_PASSWORD:postgres}"
   jpa:
     hibernate:
-      ddl-auto: "${DDL_AUTO:update}"
+      ddl-auto: "${DDL_AUTO:none}"
 
 server:
   port: "${SONG_SERVICE_SERVER_PORT:8083}"
@@ -19,7 +19,7 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      defaultZone: "${EUREKA_SERVER_SERVICE_URL:http://localhost:8761/eureka/}"
+      defaultZone: "${EUREKA_SERVER_SERVICE_URL:http://localhost:8762/eureka/}"
     healthcheck:
       enabled: true
 
