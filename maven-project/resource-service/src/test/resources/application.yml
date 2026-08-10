@@ -1,0 +1,14 @@
+spring:
+  kafka:
+    producer:
+      key-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+  cloud:
+    azure:
+      storage:
+        blob:
+          container-name: resource
+
+eureka:
+  client:
+    enabled: false

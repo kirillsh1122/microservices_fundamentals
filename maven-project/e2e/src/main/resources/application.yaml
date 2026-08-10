@@ -1,0 +1,37 @@
+server:
+  port: ${E2E_SERVER_PORT:8100}
+
+spring:
+  application:
+    name: e2e
+  datasource:
+    resource:
+      driver-class-name: org.postgresql.Driver
+      url: ${RESOURCE_SERVICE_DATASOURCE_URL:jdbc:postgresql://localhost:5432/resource-db}
+      username: ${RESOURCE_SERVICE_DATASOURCE_USERNAME:postgres}
+      password: ${RESOURCE_SERVICE_DATASOURCE_PASSWORD:postgres}
+    song:
+      driver-class-name: org.postgresql.Driver
+      url: ${SONG_SERVICE_DATASOURCE_URL:jdbc:postgresql://localhost:5433/song-db}
+      username: ${SONG_SERVICE_DATASOURCE_USERNAME:postgres}
+      password: ${SONG_SERVICE_DATASOURCE_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: none
+  cloud:
+    azure:
+      credential:
+        client-id: ${AZURE_CLIENT_ID}
+        client-secret: ${AZURE_CLIENT_SECRET}
+      profile:
+        tenant-id: ${AZURE_TENANT_ID}
+      storage:
+        blob:
+          account-name: microservstorageaccksh
+          container-name: resource
+          endpoint: ${AZURE_STORAGE_BLOB_ENDPOINT:https://microservstorageaccksh.blob.core.windows.net/}
+
+project:
+  service:
+    gateway:
+      url: ${GATEWAY_URL:http://localhost:8085}

@@ -13,8 +13,24 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
 
 eureka:
+  instance:
+    healthCheckUrlPath: "/actuator/health"
   client:
     register-with-eureka: true
     fetch-registry: true
     service-url:
       defaultZone: ${EUREKA_SERVER_SERVICE_URL:http://localhost:8761/eureka/}
+    healthcheck:
+      enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+  health:
+    ssl:
+      enabled: false

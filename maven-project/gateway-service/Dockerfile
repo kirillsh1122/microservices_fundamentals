@@ -6,6 +6,7 @@ COPY gateway-service/src gateway-service/src
 RUN mvn -f gateway-service/pom.xml clean package -Dmaven.test.skip=true
 
 FROM eclipse-temurin:21-jre-alpine-3.23
+RUN apk add --no-cache curl
 WORKDIR /gateway-service
 COPY --from=build /app/gateway-service/target/*.jar gateway-service.jar
 EXPOSE 8085

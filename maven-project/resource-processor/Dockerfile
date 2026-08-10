@@ -7,6 +7,7 @@ COPY resource-processor/src resource-processor/src
 RUN mvn -f resource-processor/pom.xml clean package -Dmaven.test.skip=true
 
 FROM eclipse-temurin:21-jre-alpine-3.23
+RUN apk add --no-cache curl
 WORKDIR /resource-processor
 COPY --from=build /app/resource-processor/target/*.jar resource-processor.jar
 EXPOSE 8087
