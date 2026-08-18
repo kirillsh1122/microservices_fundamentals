@@ -14,16 +14,20 @@ spring:
               uri: lb://song-service
               predicates:
                 - Path=/songs/**
+            - id: resource-processor
+              uri: lb://resource-processor
+              predicates:
+                - Path=/resource-processor/**
 
 server:
-  port: ${GATEWAY_SERVER_PORT:8085}
+  port: ${GATEWAY_SERVER_PORT:8086}
 
 eureka:
   instance:
     healthCheckUrlPath: "/actuator/health"
   client:
     service-url:
-      defaultZone: ${EUREKA_SERVER_SERVICE_URL:http://localhost:8761/eureka/}
+      defaultZone: ${EUREKA_SERVER_SERVICE_URL:http://localhost:8762/eureka/}
     register-with-eureka: true
     fetch-registry: true
 
