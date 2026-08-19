@@ -1,0 +1,13 @@
+server:
+  port: ${STORAGE_SERVICE_SERVER_PORT:8089}
+
+spring:
+  application:
+    name: storage-service
+  datasource:
+    url: ${STORAGE_SERVICE_DATASOURCE_URL:jdbc:postgresql://localhost:5433/storage-db}
+    username: ${STORAGE_SERVICE_DATASOURCE_USERNAME:postgres}
+    password: ${STORAGE_SERVICE_DATASOURCE_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: ${DDL_AUTO:update}

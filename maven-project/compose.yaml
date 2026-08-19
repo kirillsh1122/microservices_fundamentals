@@ -41,6 +41,24 @@ services:
     volumes:
       - ./init-scripts/song-db/init.sql:/docker-entrypoint-initdb.d/init.sql
 
+  storage-db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${STORAGE_SERVICE_DATABASE}
+      POSTGRES_USER: ${STORAGE_SERVICE_DATASOURCE_USERNAME}
+      POSTGRES_PASSWORD: ${STORAGE_SERVICE_DATASOURCE_PASSWORD}
+    ports:
+      - "5434:5432"
+    env_file:
+      - .env
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - ./init-scripts/storage-db/init.sql:/docker-entrypoint-initdb.d/init.sql
+
   resource-service:
     build:
       context: .

@@ -17,6 +17,7 @@
 
     <modules>
         <module>resource-service</module>
+        <module>storage-service</module>
         <module>song-service</module>
         <module>resource-processor</module>
         <module>e2e</module>
