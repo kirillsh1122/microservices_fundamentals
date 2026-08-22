@@ -11,6 +11,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.tika.exception.TikaException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
 
@@ -29,6 +30,9 @@ public class ResourceMessagingService{
     
     @Autowired
     private SongServiceClient songServiceClient;
+
+    @Autowired
+    private KafkaTemplate<String, Long> kafkaTemplate;
 
     @KafkaListener(topics = "resource-topic", groupId = "resource-processor-group")
     public void handleResourceMessage(ConsumerRecord<?, Long> record) throws java.io.IOException, org.apache.tika.exception.TikaException, org.xml.sax.SAXException {
@@ -49,6 +53,8 @@ public class ResourceMessagingService{
             log.info("Parsed Resource: {}", parsedResource);
             songServiceClient.createSongMetadata(songDTO);
             log.info("Sent song metadata to song-service for resource ID: {}", resourceId);
+            kafkaTemplate.send("processed-resource-topic", resourceId).get();
+            log.info("Sent processed resource message to processed-resource-topic for resource ID: {}", resourceId);
         } catch (IOException e) {
             log.error("I/O error while processing resource id {}: {}", resourceId, e.getMessage(), e);
             throw e; // declared on method signature

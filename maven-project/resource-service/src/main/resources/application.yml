@@ -13,10 +13,17 @@ spring:
       ddl-auto: ${DDL_AUTO:update}
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      auto-offset-reset: earliest
+      key-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
     producer:
       key-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
   cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
     azure:
       credential:
         client-id: ${AZURE_CLIENT_ID}
@@ -39,6 +46,19 @@ eureka:
       defaultZone: ${EUREKA_SERVER_SERVICE_URL:http://localhost:8762/eureka/}
     healthcheck:
       enabled: true
+
+resilience4j.circuitbreaker:
+  instances:
+    storage-service:
+      registerHealthIndicator: true
+      ringBufferSizeInClosedState: 5
+      ringBufferSizeInHalfOpenState: 3
+      waitDurationInOpenState: 10s
+      failureRateThreshold: 50
+      recordExceptions:
+        - feign.RetryableException
+        - feign.FeignException
+      ignoreExceptions:
 
 management:
   endpoints:

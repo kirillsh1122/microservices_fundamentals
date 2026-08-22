@@ -1,10 +1,13 @@
 package com.microservice.architecture.overview.resource_service.service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
+import com.microservice.architecture.overview.resource_service.client.StorageServiceClient;
+import com.microservice.architecture.overview.resource_service.dto.StorageEntryDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,14 +31,37 @@ public class ResourceServiceImpl implements ResourceService {
     private SongServiceClient songServiceClient;
 
     @Autowired
+    private StorageServiceClient storageServiceClient;
+
+    @Autowired
     private BlobResourceService blobResourceService;
 
     @Override
     public Resource createResource(byte[] data) throws java.io.IOException, org.apache.tika.exception.TikaException, org.xml.sax.SAXException {
-        
+
+        StorageEntryDTO stagingStorageEntry = storageServiceClient.getAllStorageEntriesByType("STAGING")
+                .getBody()
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("No STAGING storage entry found"));
+        String containerName = stagingStorageEntry.containerName();
+        String blobRootPath = stagingStorageEntry.path();
+
         Metadata metadata = SongMetadataParser.extractMetadata(data);
         Resource resource = new Resource();
-        String resourceURL = blobResourceService.uploadResource(data, metadata.get("dc:title") + "-" + UUID.randomUUID() + ".mp3");
+
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        String formattedNow = now.format(formatter);
+
+        String blobName = blobRootPath + "/" + metadata.get("dc:title") + "-" + formattedNow + ".mp3";
+
+        String resourceURL = blobResourceService.uploadResource(
+                data,
+                blobName,
+                containerName
+        );
+        log.info("Resource blob: {} uploaded to blob container: {}", blobName, containerName);
         resource.setResourceURL(resourceURL);
         resource = resourceRepository.save(resource);
         log.info("Resource created with ID: {} and URL: {}", resource.getId(), resource.getResourceURL());
@@ -92,4 +118,25 @@ public class ResourceServiceImpl implements ResourceService {
 
         return deletedIds;
     }
+
+    @Override
+    public void moveResourceToPermanentStorage(long resourceId) {
+
+        Resource resource = resourceRepository.findById(resourceId)
+                .orElseThrow(() -> new IllegalArgumentException("Resource not found with ID: " + resourceId));
+        String sourceResourceURL = resource.getResourceURL();
+
+        StorageEntryDTO permanentStorageEntry = storageServiceClient.getAllStorageEntriesByType("PERMANENT")
+                .getBody()
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("No PERMANENT storage entry found"));
+        String permanentContainerName = permanentStorageEntry.containerName();
+        String permanentBlobRootPath = permanentStorageEntry.path();
+
+        String newResourceURL = blobResourceService.moveResourceToPermanentStorage(sourceResourceURL, permanentContainerName, permanentBlobRootPath);
+        resource.setResourceURL(newResourceURL);
+        resourceRepository.save(resource);
+    }
+
 }

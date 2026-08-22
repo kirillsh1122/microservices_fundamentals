@@ -12,4 +12,6 @@ public interface ResourceService {
 	Optional<Resource> getResourceById(long resourceId);
 	
 	List<Long> deleteResourceByIds(String resourceIds);
+
+	void moveResourceToPermanentStorage(long resourceId);
 }

@@ -6,6 +6,7 @@ import com.microservice.architecture.overview.storage_service.dto.StorageEntryID
 import com.microservice.architecture.overview.storage_service.mapper.StorageEntryMapper;
 import com.microservice.architecture.overview.storage_service.model.StorageEntry;
 import com.microservice.architecture.overview.storage_service.repository.StorageEntryRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.StreamSupport;
 
-
+@Slf4j
 @Service
 public class StorageServiceImpl implements StorageService{
 
@@ -29,7 +30,7 @@ public class StorageServiceImpl implements StorageService{
     }
 
     public List<StorageEntryDTO> getStorageEntriesByType(STORAGE_ENTRY_TYPE type) {
-        Iterable<StorageEntry> allStorages = storageEntryRepository.findByStorageEntryType(type);
+        Iterable<StorageEntry> allStorages = storageEntryRepository.findAllByStorageType(type);
 
         return StreamSupport.stream(allStorages.spliterator(), false)
                 .map(StorageEntryMapper::toDTO)
@@ -37,6 +38,7 @@ public class StorageServiceImpl implements StorageService{
     }
 
     public StorageEntryIDDTO createStorageEntry(StorageEntryDTO storageEntryDTO) {
+        log.info("createStorageEntry, " + storageEntryDTO.toString());
         StorageEntry storageEntry = StorageEntryMapper.toModelInstance(storageEntryDTO);
         Long id = storageEntryRepository.save(storageEntry).getId();
         return new StorageEntryIDDTO(id);

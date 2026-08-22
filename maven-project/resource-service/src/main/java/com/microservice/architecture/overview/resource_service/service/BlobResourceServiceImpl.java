@@ -1,6 +1,7 @@
 package com.microservice.architecture.overview.resource_service.service;
 
 
+import com.microservice.architecture.overview.resource_service.configuration.BlobContainerClientFactory;
 import com.microservice.architecture.overview.resource_service.exception.AzureBlobStorageException;
 
 import com.azure.core.util.BinaryData;
@@ -18,13 +19,14 @@ import java.io.ByteArrayOutputStream;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 @Service
 @Slf4j
 public class BlobResourceServiceImpl implements BlobResourceService {
 
     @Autowired
-    private BlobContainerClient blobContainerClient;
+    private BlobContainerClientFactory blobContainerClientFactory;
 
     @Retryable(
             retryFor = {AzureBlobStorageException.class},
@@ -32,7 +34,8 @@ public class BlobResourceServiceImpl implements BlobResourceService {
             backoff = @Backoff(delay = 1000, multiplier = 2)
     )
     @Override
-    public String uploadResource(byte[] data, String fileName) {
+    public String uploadResource(byte[] data, String fileName, String containerName) {
+        BlobContainerClient blobContainerClient = blobContainerClientFactory.getClient(containerName);
         log.debug("Uploading resource. fileName: {}, dataSize: {} bytes", fileName, data.length);
         try {
             BlobClient blobClient = blobContainerClient.getBlobClient(fileName);
@@ -59,6 +62,8 @@ public class BlobResourceServiceImpl implements BlobResourceService {
         log.debug("Retrieving resource. URL: {}", resourceURL);
         try {
             String blobName = getBlobNameFromURL(resourceURL);
+            String containerName = getContainerNameFromURL(resourceURL);
+            BlobContainerClient blobContainerClient = blobContainerClientFactory.getClient(containerName);
             BlobClient blobClient = blobContainerClient.getBlobClient(blobName);
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             blobClient.downloadStream(outputStream);
@@ -84,9 +89,11 @@ public class BlobResourceServiceImpl implements BlobResourceService {
         log.debug("Deleting resource. URL: {}", resourceURL);
         try {
             String blobName = getBlobNameFromURL(resourceURL);
+            String containerName = getContainerNameFromURL(resourceURL);
+            BlobContainerClient blobContainerClient = blobContainerClientFactory.getClient(containerName);
             BlobClient blobClient = blobContainerClient.getBlobClient(blobName);
             blobClient.delete();
-            log.info("Successfully deleted resource. blobName: {}", blobName);
+            log.info("Successfully deleted resource from container: {}. blobName: {}", containerName, blobName);
         } catch(BlobStorageException e){
             log.error("Failed to delete resource. resourceURL: {}", resourceURL, e);
             throw new AzureBlobStorageException(e.getServiceMessage());
@@ -96,15 +103,50 @@ public class BlobResourceServiceImpl implements BlobResourceService {
         }
     }
 
+    @Override
+    public String moveResourceToPermanentStorage(String resourceURL, String permanentContainerName, String permanentBlobPath) {
+        String blobName = getBlobNameFromURL(resourceURL);
+        BlobContainerClient permanentContainerClient = blobContainerClientFactory.getClient(permanentContainerName);
+        BlobClient permanentBlobClient = permanentContainerClient.getBlobClient(permanentBlobPath + "/" + blobName);
+        permanentBlobClient.copyFromUrl(resourceURL);
+        deleteResourceByURL(resourceURL);
+        log.info("Successfully moved resource to permanent storage container {}. originalURL: {}, newURL: {}", permanentContainerName, resourceURL, permanentBlobClient.getBlobUrl());
+        return permanentBlobClient.getBlobUrl();
+    }
+
     private String getBlobNameFromURL(String resourceURL) {
         try {
             URI uri = URI.create(resourceURL);
             String path = uri.getPath();
-            String blobName = URLDecoder.decode(path.substring(path.lastIndexOf("/") + 1), StandardCharsets.UTF_8);
+            String[] segments = path.split("/");
+            if (segments.length < 3) {
+                throw new IllegalArgumentException("Invalid resource URL format. URL: " + resourceURL);
+            }
+            String blobName = URLDecoder.decode(String.join("/", Arrays.copyOfRange(segments, 2, segments.length)), StandardCharsets.UTF_8);
             log.debug("Extracted blob name from URL. blobName: {}", blobName);
             return blobName;
         } catch (Exception e) {
             log.warn("Failed to extract blob name from URL. URL: {}", resourceURL, e);
+            throw e;
+        }
+    }
+
+    private String getContainerNameFromURL(String resourceURL) {
+        try {
+            URI uri = URI.create(resourceURL);
+            String path = uri.getPath();
+            String[] segments = path.split("/");
+            if (segments.length < 2) {
+                throw new IllegalArgumentException("Invalid resource URL format. URL: " + resourceURL);
+            }
+            String containerName = URLDecoder.decode(segments[1], StandardCharsets.UTF_8);
+            if (containerName.isEmpty()) {
+                throw new IllegalArgumentException("Container name cannot be empty. URL: " + resourceURL);
+            }
+            log.debug("Extracted container name from URL. containerName: {}", containerName);
+            return containerName;
+        } catch (Exception e) {
+            log.warn("Failed to extract container name from URL. URL: {}", resourceURL, e);
             throw e;
         }
     }
