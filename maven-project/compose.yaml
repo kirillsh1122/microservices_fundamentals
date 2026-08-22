@@ -56,8 +56,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-#    volumes:
-#      - ./init-scripts/storage-db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    volumes:
+      - ./init-scripts/storage-db/init.sql:/docker-entrypoint-initdb.d/init.sql
 
   resource-service:
     build:
