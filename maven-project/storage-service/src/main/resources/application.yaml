@@ -22,3 +22,22 @@ eureka:
       defaultZone: "${EUREKA_SERVER_SERVICE_URL:http://localhost:8762/eureka/}"
     healthcheck:
       enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    metrics:
+      enabled: true
+      export:
+        prometheus:
+          enabled: true
+    prometheus:
+      enabled: true
+    health:
+      show-details: always
+  health:
+    ssl:
+      enabled: false
