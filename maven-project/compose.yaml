@@ -181,3 +181,10 @@ services:
         condition: service_healthy
       song-service:
         condition: service_healthy
+
+  prometheus:
+    image: prom/prometheus:v3.14.0
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yaml:/etc/prometheus/prometheus.yaml
