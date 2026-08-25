@@ -3,7 +3,7 @@
     <springProperty scope="context" name="springAppName" source="spring.application.name"/>
     <appender name="logstash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
         <destination>
-            http://logstash:5044
+            localhost:5000
         </destination>
         <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
             <providers>
