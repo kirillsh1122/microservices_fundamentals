@@ -6,6 +6,7 @@ networks:
 
 volumes:
   grafana_data:
+  elasticsearch_data:
 
 services:
   resource-db:
@@ -208,3 +209,42 @@ services:
     depends_on:
       prometheus:
         condition: service_started
+
+  elasticsearch:
+    image: elasticsearch:9.5.2
+    environment:
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+
+  kibana:
+    image: kibana:9.5.2
+    ports:
+      - "5601:5601"
+    environment:
+      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
+    depends_on:
+      elasticsearch:
+        condition: service_started
+
+  logstash:
+    image: logstash:9.5.2
+    ports:
+      - "5044:5044"
+      - "5000:5000/tcp"
+      - "5000:5000/udp"
+      - "9600:9600"
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+    volumes:
+      - ./monitoring/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+      - ./monitoring/logstash/pipeline:/usr/share/logstash/pipeline:ro
