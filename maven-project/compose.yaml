@@ -248,3 +248,8 @@ services:
     volumes:
       - ./monitoring/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
       - ./monitoring/logstash/pipeline:/usr/share/logstash/pipeline:ro
+
+  zipkin:
+    image: openzipkin/zipkin:3.6.1
+    ports:
+      - "9411:9411"

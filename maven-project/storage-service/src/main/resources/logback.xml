@@ -9,26 +9,36 @@
             <providers>
                 <timestamp>
                     <timeZone>UTC</timeZone>
+                    <fieldName>@timestamp</fieldName>
                 </timestamp>
                 <pattern>
                     <pattern>
                         {
-                        "timestamp": "@timestamp",
-                        "severity": "%level",
-                        "service": "${springAppName:-}",
-                        "trace": "%X{traceId:-}",
-                        "span": "%X{spanId:-}",
-                        "pid": "${PID:-}",
-                        "thread": "%thread",
-                        "class": "%logger{40}",
-                        "rest": "%message"
+                            "severity": "%level",
+                            "service": "${springAppName:-}",
+                            "traceId": "%X{traceId:-}",
+                            "spanId": "%X{spanId:-}",
+                            "correlationId": "%X{X-Correlation-ID:-}",
+                            "pid": "${PID:-}",
+                            "thread": "%thread",
+                            "class": "%logger{40}",
+                            "rest": "%message"
                         }
                     </pattern>
                 </pattern>
             </providers>
         </encoder>
     </appender>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <charset>${CONSOLE_LOG_CHARSET}</charset>
+        </encoder>
+    </appender>
+
     <root level="INFO">
         <appender-ref ref="logstash"/>
+        <appender-ref ref="CONSOLE"/>
     </root>
 </configuration>
