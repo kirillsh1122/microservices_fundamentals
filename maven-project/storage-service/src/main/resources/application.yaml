@@ -11,6 +11,11 @@ spring:
   jpa:
     hibernate:
       ddl-auto: ${DDL_AUTO:none}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${JWK_SET_URI:http://localhost:9000/oauth2/jwks}
 
 eureka:
   instance:
