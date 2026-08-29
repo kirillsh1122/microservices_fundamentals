@@ -35,6 +35,20 @@ spring:
           account-name: microservstorageaccksh
           container-name: resource
           endpoint: ${AZURE_STORAGE_BLOB_ENDPOINT:https://microservstorageaccksh.blob.core.windows.net/}
+  security:
+    oauth2:
+      client:
+        registration:
+          storage-service:
+            provider: auth-server
+            client-id: resource-service
+            client-secret: resource-service-secret
+            authorization-grant-type: client_credentials
+            scope: readStorageEntries
+        provider:
+          auth-server:
+            token-uri: ${TOKEN_URI:http://localhost:9000/oauth2/token}
+#            issuer-uri: ${AUTH_SERVER_PROVIDER_URL:http://localhost:9000/oauth2/token}
 
 eureka:
   instance:

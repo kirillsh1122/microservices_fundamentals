@@ -1,6 +1,7 @@
 package com.microservice.architecture.overview.resource_service.client;
 
 
+import com.microservice.architecture.overview.resource_service.configuration.StorageFeignConfig;
 import com.microservice.architecture.overview.resource_service.dto.StorageEntryDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +12,8 @@ import java.util.List;
 
 @FeignClient(
         name = "storage-service",
-        fallback = StorageServiceClientFallback.class
+        fallback = StorageServiceClientFallback.class,
+        configuration = StorageFeignConfig.class
 )
 public interface StorageServiceClient {
 

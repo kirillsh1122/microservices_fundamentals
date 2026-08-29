@@ -39,6 +39,8 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     public Resource createResource(byte[] data) throws java.io.IOException, org.apache.tika.exception.TikaException, org.xml.sax.SAXException {
 
+        System.out.println("=== CALLING STORAGE SERVICE ===");
+
         StorageEntryDTO stagingStorageEntry = storageServiceClient.getAllStorageEntriesByType("STAGING")
                 .getBody()
                 .stream()
