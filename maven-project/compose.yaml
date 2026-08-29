@@ -253,3 +253,21 @@ services:
     image: openzipkin/zipkin:3.6.1
     ports:
       - "9411:9411"
+
+  auth-server:
+    build:
+      context: .
+      dockerfile: ./auth-server/Dockerfile
+    ports:
+      - "9000:9000"
+    env_file:
+      - .env
+    healthcheck:
+      test: [ "CMD", "curl", "--silent", "--fail", "http://localhost:8081/actuator/health" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 1m30s
+    depends_on:
+      eureka-server:
+        condition: service_started
