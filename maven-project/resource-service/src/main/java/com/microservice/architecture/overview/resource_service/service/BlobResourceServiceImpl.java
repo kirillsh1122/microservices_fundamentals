@@ -106,8 +106,10 @@ public class BlobResourceServiceImpl implements BlobResourceService {
     @Override
     public String moveResourceToPermanentStorage(String resourceURL, String permanentContainerName, String permanentBlobPath) {
         String blobName = getBlobNameFromURL(resourceURL);
+        String[] segments = blobName.split("/");
+        String fileName = segments[segments.length-1];
         BlobContainerClient permanentContainerClient = blobContainerClientFactory.getClient(permanentContainerName);
-        BlobClient permanentBlobClient = permanentContainerClient.getBlobClient(permanentBlobPath + "/" + blobName);
+        BlobClient permanentBlobClient = permanentContainerClient.getBlobClient(permanentBlobPath + "/" + fileName);
         permanentBlobClient.copyFromUrl(resourceURL);
         deleteResourceByURL(resourceURL);
         log.info("Successfully moved resource to permanent storage container {}. originalURL: {}, newURL: {}", permanentContainerName, resourceURL, permanentBlobClient.getBlobUrl());
@@ -119,11 +121,13 @@ public class BlobResourceServiceImpl implements BlobResourceService {
             URI uri = URI.create(resourceURL);
             String path = uri.getPath();
             String[] segments = path.split("/");
-            if (segments.length < 3) {
+            if (segments.length < 2) {
                 throw new IllegalArgumentException("Invalid resource URL format. URL: " + resourceURL);
             }
-            String blobName = URLDecoder.decode(String.join("/", Arrays.copyOfRange(segments, 2, segments.length)), StandardCharsets.UTF_8);
-            log.debug("Extracted blob name from URL. blobName: {}", blobName);
+            String blobName = URLDecoder.decode(String.join("/", Arrays.copyOfRange(segments, segments.length-2, segments.length)), StandardCharsets.UTF_8);
+//            String blobName = URLDecoder.decode(segments[segments.length-1], StandardCharsets.UTF_8);
+            System.out.println("blobName: " + blobName);
+            log.info("Extracted blob name from URL. blobName: {}", blobName);
             return blobName;
         } catch (Exception e) {
             log.warn("Failed to extract blob name from URL. URL: {}", resourceURL, e);
@@ -139,11 +143,12 @@ public class BlobResourceServiceImpl implements BlobResourceService {
             if (segments.length < 2) {
                 throw new IllegalArgumentException("Invalid resource URL format. URL: " + resourceURL);
             }
-            String containerName = URLDecoder.decode(segments[1], StandardCharsets.UTF_8);
+            String containerName = URLDecoder.decode(segments[2], StandardCharsets.UTF_8);
             if (containerName.isEmpty()) {
                 throw new IllegalArgumentException("Container name cannot be empty. URL: " + resourceURL);
             }
-            log.debug("Extracted container name from URL. containerName: {}", containerName);
+            System.out.println("containerName: " + containerName);
+            log.info("Extracted container name from URL. containerName: {}", containerName);
             return containerName;
         } catch (Exception e) {
             log.warn("Failed to extract container name from URL. URL: {}", resourceURL, e);
