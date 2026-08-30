@@ -143,7 +143,7 @@ public class BlobResourceServiceImpl implements BlobResourceService {
             if (segments.length < 2) {
                 throw new IllegalArgumentException("Invalid resource URL format. URL: " + resourceURL);
             }
-            String containerName = URLDecoder.decode(segments[2], StandardCharsets.UTF_8);
+            String containerName = URLDecoder.decode(segments[segments.length-3], StandardCharsets.UTF_8);
             if (containerName.isEmpty()) {
                 throw new IllegalArgumentException("Container name cannot be empty. URL: " + resourceURL);
             }

@@ -80,6 +80,8 @@ services:
     depends_on:
       storage-db:
         condition: service_healthy
+      auth-server:
+        condition: service_healthy
 
   resource-service:
     build:
@@ -113,6 +115,8 @@ services:
         condition: service_healthy
       eureka-server:
         condition: service_started
+      auth-server:
+        condition: service_healthy
 
   song-service:
     build:
