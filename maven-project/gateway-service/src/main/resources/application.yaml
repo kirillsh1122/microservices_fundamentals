@@ -22,6 +22,11 @@ spring:
               uri: lb://storage-service
               predicates:
                 - Path=/storages/**
+            - id: auth-server
+              uri: lb://auth-server
+              predicates:
+                - Path=/oauth2/**
+                - Path=/login/**
 
 server:
   port: ${GATEWAY_SERVER_PORT:8086}

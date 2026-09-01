@@ -16,14 +16,14 @@
                 <pattern>
                     <pattern>
                         {
-                            "severity": "%level",
-                            "service": "${springAppName:-}",
-                            "traceId": "%X{traceId:-}",
-                            "spanId": "%X{spanId:-}",
-                            "pid": "${PID:-}",
-                            "thread": "%thread",
-                            "class": "%logger{40}",
-                            "rest": "%message"
+                        "severity": "%level",
+                        "service": "${springAppName:-}",
+                        "traceId": "%X{traceId:-}",
+                        "spanId": "%X{spanId:-}",
+                        "pid": "${PID:-}",
+                        "thread": "%thread",
+                        "class": "%logger{40}",
+                        "rest": "%message"
                         }
                     </pattern>
                 </pattern>

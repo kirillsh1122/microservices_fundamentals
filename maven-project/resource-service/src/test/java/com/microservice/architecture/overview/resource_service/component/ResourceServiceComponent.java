@@ -1,13 +1,18 @@
 package com.microservice.architecture.overview.resource_service.component;
 
 import com.microservice.architecture.overview.resource_service.client.SongServiceClient;
+import com.microservice.architecture.overview.resource_service.client.StorageServiceClient;
 import com.microservice.architecture.overview.resource_service.configuration.AzureBlobConfiguration;
+import com.microservice.architecture.overview.resource_service.configuration.BlobContainerClientFactory;
 import com.microservice.architecture.overview.resource_service.controller.ResourceController;
 import com.microservice.architecture.overview.resource_service.dto.ResourceIdResponse;
+import com.microservice.architecture.overview.resource_service.dto.StorageEntryDTO;
 import com.microservice.architecture.overview.resource_service.repository.ResourceRepository;
 import com.microservice.architecture.overview.resource_service.service.BlobResourceServiceImpl;
 import com.microservice.architecture.overview.resource_service.service.ResourceMessagingServiceImpl;
 import com.microservice.architecture.overview.resource_service.service.ResourceServiceImpl;
+import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
@@ -19,6 +24,7 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -34,18 +40,42 @@ import org.testcontainers.utility.MountableFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 
 @SpringBootTest(
-        classes = {ResourceServiceComponent.ResourceConfig.class, AzureBlobConfiguration.class},
+        classes = {
+                ResourceServiceComponent.ResourceConfig.class,
+                AzureBlobConfiguration.class,
+                BlobContainerClientFactory.class
+        },
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWebTestClient
 @DirtiesContext
 @Testcontainers
 public class ResourceServiceComponent {
+
+    @MockitoBean
+    private StorageServiceClient storageServiceClient;
+
+    @BeforeEach
+    void setup() {
+        when(storageServiceClient.getAllStorageEntriesByType(anyString()))
+                .thenReturn(ResponseEntity.ok(List.of(
+                        new StorageEntryDTO(
+                                1111L,
+                                "MOCKED",
+                                "resource",
+                                "files" + UUID.randomUUID()
+                        )
+                )));
+    }
 
     @SpringBootConfiguration
     @EnableAutoConfiguration
