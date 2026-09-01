@@ -21,8 +21,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.authorizeHttpRequests(
                 authorizeRequests -> authorizeRequests
-                        .anyRequest()
-                        .authenticated()
+                        .requestMatchers("/actuator/**").permitAll()
+                        .anyRequest().authenticated()
         ).formLogin(Customizer.withDefaults()).build();
     }
 

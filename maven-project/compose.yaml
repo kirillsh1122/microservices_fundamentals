@@ -267,7 +267,7 @@ services:
     env_file:
       - .env
     healthcheck:
-      test: [ "CMD", "curl", "--silent", "--fail", "http://localhost:8081/actuator/health" ]
+      test: [ "CMD", "curl", "--silent", "--fail", "http://localhost:9000/actuator/health" ]
       interval: 10s
       timeout: 10s
       retries: 5
