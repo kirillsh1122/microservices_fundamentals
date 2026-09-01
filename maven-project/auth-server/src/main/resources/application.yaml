@@ -24,6 +24,8 @@ management:
   endpoint:
     health:
       show-details: always
+  tracing:
+    enabled: false
   health:
     ssl:
       enabled: false
