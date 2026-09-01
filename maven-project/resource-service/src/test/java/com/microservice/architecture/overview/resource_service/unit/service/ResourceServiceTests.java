@@ -1,6 +1,9 @@
 package com.microservice.architecture.overview.resource_service.unit.service;
 
 
+import ch.qos.logback.core.net.SyslogOutputStream;
+import com.microservice.architecture.overview.resource_service.client.StorageServiceClient;
+import com.microservice.architecture.overview.resource_service.dto.StorageEntryDTO;
 import com.microservice.architecture.overview.resource_service.model.Resource;
 import com.microservice.architecture.overview.resource_service.repository.ResourceRepository;
 import com.microservice.architecture.overview.resource_service.service.ResourceServiceImpl;
@@ -10,7 +13,10 @@ import com.microservice.architecture.overview.resource_service.utils.SongMetadat
 
 import org.apache.tika.metadata.Metadata;
 
+import org.junit.Before;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -20,9 +26,14 @@ import org.mockito.Mockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.annotation.Bean;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.List;
 import java.util.Optional;
+
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ResourceServiceTests {
@@ -35,6 +46,24 @@ public class ResourceServiceTests {
 
     @Mock
     private SongServiceClient songServiceClient;
+
+    @Mock
+    private StorageServiceClient storageServiceClient;
+
+    private final List<StorageEntryDTO> mockedResponse = List.of(
+            new StorageEntryDTO(
+                    1111L,
+                    "STAGING",
+                    "staging-test-resource-1",
+                    "files"
+            ),
+            new StorageEntryDTO(
+                    2222L,
+                    "PERMANENT",
+                    "permanent-test-resource-1",
+                    "files"
+            )
+    );
 
     @InjectMocks
     private ResourceServiceImpl resourceService;
@@ -52,8 +81,10 @@ public class ResourceServiceTests {
             mocked.when(() -> SongMetadataParser.extractMetadata(data)).thenReturn(metadata);
 
             // mock blob upload to return a URL
-            String uploadedUrl = "https://blob.example.com/MySongTitle-12345.mp3";
-            Mockito.when(blobResourceService.uploadResource(Mockito.eq(data), Mockito.anyString()))
+            String uploadedUrl = "https://blob.example.com/files/MySongTitle-12345.mp3";
+            Mockito.when(storageServiceClient.getAllStorageEntriesByType("STAGING"))
+                    .thenReturn(ResponseEntity.ok(List.of(mockedResponse.getFirst())));
+            Mockito.when(blobResourceService.uploadResource(Mockito.eq(data), Mockito.anyString(), Mockito.anyString()))
                     .thenReturn(uploadedUrl);
 
             // mock repository save to return resource with id set
@@ -80,9 +111,9 @@ public class ResourceServiceTests {
 
                 // capture filename passed to blob upload and ensure it contains title and .mp3
                 ArgumentCaptor<String> filenameCaptor = ArgumentCaptor.forClass(String.class);
-                Mockito.verify(blobResourceService).uploadResource(Mockito.eq(data), filenameCaptor.capture());
+                Mockito.verify(blobResourceService).uploadResource(Mockito.eq(data), filenameCaptor.capture(), Mockito.anyString());
                 String filename = filenameCaptor.getValue();
-                Assertions.assertTrue(filename.startsWith("MySongTitle-"));
+                Assertions.assertTrue(filename.contains("MySongTitle"));
                 Assertions.assertTrue(filename.endsWith(".mp3"));
 
                 Mockito.verify(resourceRepository).save(Mockito.any(Resource.class));

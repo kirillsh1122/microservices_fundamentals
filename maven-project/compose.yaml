@@ -4,6 +4,10 @@ networks:
     external: true
     name: kafka-net
 
+volumes:
+  grafana_data:
+  elasticsearch_data:
+
 services:
   resource-db:
     image: postgres:17-alpine
@@ -41,6 +45,46 @@ services:
     volumes:
       - ./init-scripts/song-db/init.sql:/docker-entrypoint-initdb.d/init.sql
 
+  storage-db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${STORAGE_SERVICE_DATABASE}
+      POSTGRES_USER: ${STORAGE_SERVICE_DATASOURCE_USERNAME}
+      POSTGRES_PASSWORD: ${STORAGE_SERVICE_DATASOURCE_PASSWORD}
+    ports:
+      - "5434:5432"
+    env_file:
+      - .env
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - ./init-scripts/storage-db/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  storage-service:
+    build:
+      context: .
+      dockerfile: ./storage-service/Dockerfile
+    ports:
+      - "8089:8089"
+    env_file:
+      - .env
+    healthcheck:
+      test: [ "CMD", "curl", "--silent", "--fail", "http://localhost:8089/actuator/health" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 3m
+    depends_on:
+      storage-db:
+        condition: service_healthy
+      auth-server:
+        condition: service_healthy
+      logstash:
+        condition: service_healthy
+
   resource-service:
     build:
       context: .
@@ -61,7 +105,7 @@ services:
       interval: 10s
       timeout: 10s
       retries: 5
-      start_period: 1m30s
+      start_period: 3m
     depends_on:
       resource-db:
         condition: service_healthy
@@ -69,8 +113,14 @@ services:
         condition: service_healthy
       resource-processor:
         condition: service_healthy
+      storage-service:
+        condition: service_healthy
       eureka-server:
         condition: service_started
+      auth-server:
+        condition: service_healthy
+      logstash:
+        condition: service_healthy
 
   song-service:
     build:
@@ -85,12 +135,14 @@ services:
       interval: 10s
       timeout: 10s
       retries: 5
-      start_period: 1m30s
+      start_period: 3m
     depends_on:
       song-db:
         condition: service_healthy
       eureka-server:
         condition: service_started
+      logstash:
+        condition: service_healthy
 
   resource-processor:
     build:
@@ -108,10 +160,12 @@ services:
       interval: 10s
       timeout: 10s
       retries: 5
-      start_period: 1m30s
+      start_period: 3m
     depends_on:
       eureka-server:
         condition: service_started
+      logstash:
+        condition: service_healthy
 
   eureka-server:
     build:
@@ -143,3 +197,106 @@ services:
         condition: service_healthy
       song-service:
         condition: service_healthy
+
+  prometheus:
+    image: prom/prometheus:v3.14.0
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yaml:/etc/prometheus/prometheus.yaml
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yaml"
+
+  grafana:
+    image: grafana/grafana:13.0.7-slim
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      prometheus:
+        condition: service_started
+
+  elasticsearch:
+    image: elasticsearch:9.5.2
+    environment:
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -fs http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=5s || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 2m
+
+  kibana:
+    image: kibana:9.5.2
+    ports:
+      - "5601:5601"
+    environment:
+      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      logstash:
+        condition: service_healthy
+
+  logstash:
+    image: logstash:9.5.2
+    ports:
+      - "5044:5044"
+      - "5000:5000/tcp"
+      - "5000:5000/udp"
+      - "9600:9600"
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+    volumes:
+      - ./monitoring/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+      - ./monitoring/logstash/pipeline:/usr/share/logstash/pipeline:r
+    healthcheck:
+      test: [ "CMD", "curl", "--silent", "--fail", "http://localhost:9600/_health_report" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 2m
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+  zipkin:
+    image: openzipkin/zipkin:3.6.1
+    ports:
+      - "9411:9411"
+
+  auth-server:
+    build:
+      context: .
+      dockerfile: ./auth-server/Dockerfile
+    ports:
+      - "9000:9000"
+    env_file:
+      - .env
+    healthcheck:
+      test: [ "CMD", "curl", "--silent", "--fail", "http://localhost:9000/actuator/health" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 3m
+    depends_on:
+      eureka-server:
+        condition: service_started

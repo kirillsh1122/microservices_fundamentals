@@ -57,7 +57,19 @@
         </dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-circuitbreaker-resilience4j</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-oauth2-client</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.postgresql</groupId>
@@ -87,6 +99,7 @@
 			<groupId>com.azure</groupId>
 			<artifactId>azure-identity</artifactId>
 		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
@@ -214,9 +227,9 @@
 						<include>**/*Test.java</include>
 						<include>**/*Component.java</include>
 					</includes>
-					<environmentVariables>
-						<DOCKER_HOST>tcp://192.168.1.103:2375</DOCKER_HOST>
-					</environmentVariables>
+<!--					<environmentVariables>-->
+<!--						<DOCKER_HOST>tcp://192.168.1.103:2375</DOCKER_HOST>-->
+<!--					</environmentVariables>-->
 				</configuration>
 			</plugin>
 			<plugin>

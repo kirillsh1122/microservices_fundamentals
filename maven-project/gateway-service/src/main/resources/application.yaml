@@ -18,6 +18,15 @@ spring:
               uri: lb://resource-processor
               predicates:
                 - Path=/resource-processor/**
+            - id: storage-service
+              uri: lb://storage-service
+              predicates:
+                - Path=/storages/**
+            - id: auth-server
+              uri: lb://auth-server
+              predicates:
+                - Path=/oauth2/**
+                - Path=/login/**
 
 server:
   port: ${GATEWAY_SERVER_PORT:8086}
@@ -35,8 +44,15 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,metrics,prometheus
   endpoint:
+    metrics:
+      enabled: true
+      export:
+        prometheus:
+          enabled: true
+    prometheus:
+      enabled: true
     health:
       show-details: always
   health:
