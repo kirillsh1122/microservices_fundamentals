@@ -76,7 +76,7 @@ services:
       interval: 10s
       timeout: 10s
       retries: 5
-      start_period: 1m30s
+      start_period: 3m
     depends_on:
       storage-db:
         condition: service_healthy
@@ -103,7 +103,7 @@ services:
       interval: 10s
       timeout: 10s
       retries: 5
-      start_period: 1m30s
+      start_period: 3m
     depends_on:
       resource-db:
         condition: service_healthy
@@ -131,7 +131,7 @@ services:
       interval: 10s
       timeout: 10s
       retries: 5
-      start_period: 1m30s
+      start_period: 3m
     depends_on:
       song-db:
         condition: service_healthy
@@ -154,7 +154,7 @@ services:
       interval: 10s
       timeout: 10s
       retries: 5
-      start_period: 1m30s
+      start_period: 3m
     depends_on:
       eureka-server:
         condition: service_started
@@ -271,7 +271,7 @@ services:
       interval: 10s
       timeout: 10s
       retries: 5
-      start_period: 1m30s
+      start_period: 3m
     depends_on:
       eureka-server:
         condition: service_started
