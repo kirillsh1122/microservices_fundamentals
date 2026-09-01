@@ -1,0 +1,31 @@
+server:
+  port: 9000
+
+spring:
+  application:
+    name: auth-server
+
+eureka:
+  instance:
+    healthCheckUrlPath: "/actuator/health"
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: "${EUREKA_SERVER_SERVICE_URL:http://localhost:8762/eureka/}"
+    healthcheck:
+      enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+  tracing:
+    enabled: false
+  health:
+    ssl:
+      enabled: false
