@@ -19,6 +19,7 @@ public class SecurityConfig {
 
         http.authorizeHttpRequests((authorize) -> authorize
                 .requestMatchers(HttpMethod.OPTIONS).permitAll()
+                .requestMatchers("/actuator/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/storages/**").hasAuthority("SCOPE_createStorageEntries")
                 .requestMatchers(HttpMethod.DELETE, "/storages/**").hasAuthority("SCOPE_deleteStorageEntries")
                 .requestMatchers(HttpMethod.GET, "/storages/**").hasAuthority("SCOPE_readStorageEntries")
