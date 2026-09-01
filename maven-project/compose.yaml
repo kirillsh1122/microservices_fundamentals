@@ -82,6 +82,8 @@ services:
         condition: service_healthy
       auth-server:
         condition: service_healthy
+      logstash:
+        condition: service_healthy
 
   resource-service:
     build:
@@ -117,6 +119,8 @@ services:
         condition: service_started
       auth-server:
         condition: service_healthy
+      logstash:
+        condition: service_healthy
 
   song-service:
     build:
@@ -137,6 +141,8 @@ services:
         condition: service_healthy
       eureka-server:
         condition: service_started
+      logstash:
+        condition: service_healthy
 
   resource-processor:
     build:
@@ -158,6 +164,8 @@ services:
     depends_on:
       eureka-server:
         condition: service_started
+      logstash:
+        condition: service_healthy
 
   eureka-server:
     build:
@@ -229,6 +237,12 @@ services:
       - "9200:9200"
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -fs http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=5s || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 2m
 
   kibana:
     image: kibana:9.5.2
@@ -238,7 +252,9 @@ services:
       ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
     depends_on:
       elasticsearch:
-        condition: service_started
+        condition: service_healthy
+      logstash:
+        condition: service_healthy
 
   logstash:
     image: logstash:9.5.2
@@ -251,7 +267,16 @@ services:
       LS_JAVA_OPTS: "-Xmx256m -Xms256m"
     volumes:
       - ./monitoring/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
-      - ./monitoring/logstash/pipeline:/usr/share/logstash/pipeline:ro
+      - ./monitoring/logstash/pipeline:/usr/share/logstash/pipeline:r
+    healthcheck:
+      test: [ "CMD", "curl", "--silent", "--fail", "http://localhost:9600/_health_report" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 2m
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
 
   zipkin:
     image: openzipkin/zipkin:3.6.1
