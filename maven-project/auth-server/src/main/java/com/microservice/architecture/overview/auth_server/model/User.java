@@ -12,6 +12,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 
 @Data
 @Entity
@@ -30,10 +32,24 @@ public class User implements UserDetails {
     private final String password;
     private final String role;
 
+    private static final HashMap<String, Collection<? extends GrantedAuthority>> roleAuthorityMapping =
+            new HashMap<>() {{
+                put("ROLE_ADMIN",
+                        List.of(
+                                new SimpleGrantedAuthority("readStorageEntries"),
+                                new SimpleGrantedAuthority("createStorageEntries"),
+                                new SimpleGrantedAuthority("deleteStorageEntries")
+                        ));
+                put("ROLE_GUEST",
+                        List.of(
+                                new SimpleGrantedAuthority("readStorageEntries")
+                        ));
+            }};
+
     @Override
     @Transient
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(new SimpleGrantedAuthority(role));
+        return roleAuthorityMapping.getOrDefault(role, Collections.emptyList());
     }
 
     @Override
