@@ -21,7 +21,7 @@ spring:
             client-id: storage-client
             client-secret: storage-client-secret
             authorization-grant-type: authorization_code
-            redirect-uri: "http://localhost:8085/login/oauth2/code/storage-client"
+            redirect-uri: "http://localhost:8095/login/oauth2/code/storage-client"
             scope: openid, readStorageEntries, createStorageEntries, deleteStorageEntries
         provider:
           auth-server:
