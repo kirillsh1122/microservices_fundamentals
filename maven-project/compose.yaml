@@ -313,6 +313,8 @@ services:
       dockerfile: ./storage-client/Dockerfile
     ports:
       - "8095:8095"
+    environment:
+      ISSUER_URI: "http://${VM_HOST_IP}:9000"
     env_file:
       - .env
     healthcheck:
