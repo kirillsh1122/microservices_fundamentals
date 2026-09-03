@@ -130,6 +130,8 @@ services:
       - "8081-8082:8081"
     env_file:
       - .env
+    deploy:
+        replicas: 2
     healthcheck:
       test: [ "CMD", "curl", "--silent", "--fail", "http://localhost:8081/actuator/health" ]
       interval: 10s
