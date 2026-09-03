@@ -21,6 +21,7 @@
         <module>song-service</module>
         <module>resource-processor</module>
         <module>auth-server</module>
+        <module>storage-client</module>
         <module>e2e</module>
     </modules>
 
