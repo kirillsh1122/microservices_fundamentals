@@ -116,7 +116,7 @@ services:
       storage-service:
         condition: service_healthy
       eureka-server:
-        condition: service_started
+        condition: service_healthy
       auth-server:
         condition: service_healthy
       logstash:
@@ -140,7 +140,7 @@ services:
       song-db:
         condition: service_healthy
       eureka-server:
-        condition: service_started
+        condition: service_healthy
       logstash:
         condition: service_healthy
 
@@ -163,7 +163,7 @@ services:
       start_period: 3m
     depends_on:
       eureka-server:
-        condition: service_started
+        condition: service_healthy
       logstash:
         condition: service_healthy
 
@@ -173,6 +173,12 @@ services:
       dockerfile: ./eureka-server/Dockerfile
     env_file:
       - .env
+    healthcheck:
+      test: [ "CMD", "curl", "--silent", "--fail", "http://localhost:8761/actuator/health" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 1m
     ports:
       - "8761:8761"
 
@@ -192,7 +198,7 @@ services:
       start_period: 30s
     depends_on:
       eureka-server:
-        condition: service_started
+        condition: service_healthy
       resource-service:
         condition: service_healthy
       song-service:
@@ -299,4 +305,26 @@ services:
       start_period: 3m
     depends_on:
       eureka-server:
-        condition: service_started
+        condition: service_healthy
+
+  storage-client:
+    build:
+      context: .
+      dockerfile: ./storage-client/Dockerfile
+    ports:
+      - "8095:8095"
+    env_file:
+      - .env
+    healthcheck:
+      test: [ "CMD", "curl", "--silent", "--fail", "http://localhost:8095/actuator/health" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 3m
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      storage-service:
+        condition: service_healthy
+      auth-server:
+        condition: service_healthy
