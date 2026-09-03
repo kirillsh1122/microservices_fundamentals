@@ -34,6 +34,19 @@ spring:
 #            token-uri: http://localhost:9000/oauth2/token
 #            jwk-set-uri: http://localhost:9000/oauth2/jwks
 
+resilience4j.circuitbreaker:
+  instances:
+    storage-service:
+      registerHealthIndicator: true
+      ringBufferSizeInClosedState: 5
+      ringBufferSizeInHalfOpenState: 3
+      waitDurationInOpenState: 10s
+      failureRateThreshold: 50
+      recordExceptions:
+        - feign.RetryableException
+        - feign.FeignException
+      ignoreExceptions:
+
 eureka:
   instance:
     healthCheckUrlPath: "/actuator/health"
