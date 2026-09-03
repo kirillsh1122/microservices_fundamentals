@@ -25,7 +25,7 @@ spring:
             scope: openid, readStorageEntries, createStorageEntries, deleteStorageEntries
         provider:
           auth-server:
-            issuer-uri: http://localhost:9000
+            issuer-uri: ${ISSUER_URI:http://localhost:9000}
 #            authorization-uri: http://localhost:9000/oauth2/authorize
 #            token-uri: http://localhost:9000/oauth2/token
 #            jwk-set-uri: http://localhost:9000/oauth2/jwks
