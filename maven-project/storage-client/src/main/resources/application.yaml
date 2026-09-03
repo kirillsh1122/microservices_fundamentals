@@ -21,12 +21,11 @@ spring:
             client-id: storage-client
             client-secret: storage-client-secret
             authorization-grant-type: authorization_code
-            redirect-uri: "{baseUrl}/login/oauth2/code/storage-client"
+            redirect-uri: "http://localhost:8085/login/oauth2/code/storage-client"
             scope: openid, readStorageEntries, createStorageEntries, deleteStorageEntries
         provider:
           auth-server:
-            issuer-uri: http://localhost:9000
-#            issuer-uri: ${ISSUER_URI:http://localhost:9000}
+            issuer-uri: ${ISSUER_URI:http://localhost:9000}
 #            authorization-uri: http://localhost:9000/oauth2/authorize
 #            token-uri: http://localhost:9000/oauth2/token
 #            jwk-set-uri: http://localhost:9000/oauth2/jwks
