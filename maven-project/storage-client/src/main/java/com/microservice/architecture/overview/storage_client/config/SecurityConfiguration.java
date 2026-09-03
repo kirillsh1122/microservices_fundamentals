@@ -1,6 +1,12 @@
 package com.microservice.architecture.overview.storage_client.config;
 
 
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
@@ -11,20 +17,14 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import org.springframework.web.filter.OncePerRequestFilter;
 
+import java.io.IOException;
+
+@Slf4j
 @EnableWebSecurity
 @Configuration
 public class SecurityConfiguration {
-
-//    @Bean
-//    @Order(Ordered.HIGHEST_PRECEDENCE)
-//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//        return http.authorizeHttpRequests(
-//                authorizeRequests -> authorizeRequests
-//                        .anyRequest().permitAll()
-//        ).build(); //.formLogin(Customizer.withDefaults())
-//    }
 
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -49,6 +49,30 @@ public class SecurityConfiguration {
                 );
 
         return http.build();
+    }
+
+    @Bean
+    public OncePerRequestFilter sessionDebugFilter() {
+        return new OncePerRequestFilter() {
+
+            @Override
+            protected void doFilterInternal(
+                    HttpServletRequest request,
+                    HttpServletResponse response,
+                    FilterChain filterChain)
+                    throws ServletException, IOException {
+
+                HttpSession session = request.getSession(false);
+
+                log.warn(
+                        "SESSION DEBUG | URI={} | SESSION={}",
+                        request.getRequestURI(),
+                        session != null ? session.getId() : "NONE"
+                );
+
+                filterChain.doFilter(request, response);
+            }
+        };
     }
 
     @Bean
