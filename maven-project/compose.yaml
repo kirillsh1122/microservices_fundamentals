@@ -178,7 +178,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-      start_period: 3m
+      start_period: 1m
     ports:
       - "8761:8761"
 
