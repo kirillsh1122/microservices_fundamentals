@@ -12,6 +12,10 @@ spring:
     hiddenmethod:
       filter:
         enabled: true
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
   security:
     oauth2:
       client:
