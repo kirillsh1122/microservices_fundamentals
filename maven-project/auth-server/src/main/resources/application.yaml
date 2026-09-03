@@ -1,5 +1,9 @@
 server:
   port: 9000
+  servlet:
+    session:
+      cookie:
+        name: AUTH_SERVER_SESSION
 
 spring:
   application:
@@ -29,3 +33,8 @@ management:
   health:
     ssl:
       enabled: false
+
+#logging:
+#  level:
+#    org.springframework.security: TRACE
+#    org.springframework.security.oauth2: TRACE

@@ -53,7 +53,8 @@ public class AuthorizationServerConfig {
         http.securityMatcher(authorizationServerConfigurer.getEndpointsMatcher())
                 .with(
                         authorizationServerConfigurer,
-                        Customizer.withDefaults()
+                        authorizationServer -> authorizationServer
+                                .oidc(Customizer.withDefaults())
                 )
                 .authorizeHttpRequests(authorize ->
                         authorize.anyRequest().authenticated()
@@ -79,7 +80,8 @@ public class AuthorizationServerConfig {
                         .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                         .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                         .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-                        .redirectUri("http://localhost:9000/login/oauth2/code/storage-client")
+                        .redirectUri("http://localhost:8095/login/oauth2/code/storage-client")
+                        .postLogoutRedirectUri("http://localhost:8095/storage-client")
                         .scope("readStorageEntries")
                         .scope("createStorageEntries")
                         .scope("deleteStorageEntries")

@@ -1,0 +1,75 @@
+server:
+  port: ${STORAGE_CLIENT_PORT:8095}
+  servlet:
+    session:
+      cookie:
+        name: STORAGE_CLIENT_SESSION
+
+spring:
+  application:
+    name: storage-client
+  mvc:
+    hiddenmethod:
+      filter:
+        enabled: true
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
+  security:
+    oauth2:
+      client:
+        registration:
+          storage-client:
+            provider: auth-server
+            client-id: storage-client
+            client-secret: storage-client-secret
+            authorization-grant-type: authorization_code
+            redirect-uri: "http://localhost:8095/login/oauth2/code/storage-client"
+            scope: openid, readStorageEntries, createStorageEntries, deleteStorageEntries
+        provider:
+          auth-server:
+            issuer-uri: ${ISSUER_URI:http://localhost:9000}
+
+resilience4j.circuitbreaker:
+  instances:
+    storage-service:
+      registerHealthIndicator: true
+      ringBufferSizeInClosedState: 5
+      ringBufferSizeInHalfOpenState: 3
+      waitDurationInOpenState: 10s
+      failureRateThreshold: 50
+      recordExceptions:
+        - feign.RetryableException
+        - feign.FeignException
+      ignoreExceptions:
+
+eureka:
+  instance:
+    healthCheckUrlPath: "/actuator/health"
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: ${EUREKA_SERVER_SERVICE_URL:http://localhost:8762/eureka/}
+    healthcheck:
+      enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,circuitbreakers
+  endpoint:
+    health:
+      show-details: always
+  tracing:
+    enabled: false
+  health:
+    ssl:
+      enabled: false
+
+#logging:
+#  level:
+#    org.springframework.security: TRACE
+#    org.springframework.security.oauth2: TRACE

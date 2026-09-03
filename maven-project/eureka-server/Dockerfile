@@ -6,6 +6,7 @@ COPY eureka-server/src eureka-server/src
 RUN mvn -f eureka-server/pom.xml clean package -Dmaven.test.skip=true
 
 FROM eclipse-temurin:21-jre-alpine-3.23
+RUN apk add --no-cache curl
 WORKDIR /eureka-server
 COPY --from=build /app/eureka-server/target/*.jar eureka-server.jar
 EXPOSE 8761
