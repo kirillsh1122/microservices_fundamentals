@@ -28,11 +28,16 @@ management:
   endpoint:
     health:
       show-details: always
-  tracing:
-    enabled: false
   health:
     ssl:
       enabled: false
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: "${ZIPKIN_ENDPOINT:http://localhost:9411/api/v2/spans}"
 
 #logging:
 #  level:

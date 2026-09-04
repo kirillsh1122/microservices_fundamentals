@@ -9,10 +9,11 @@ import com.microservice.architecture.overview.song_service.exceptions.InvalidIdE
 import com.microservice.architecture.overview.song_service.model.Song;
 import com.microservice.architecture.overview.song_service.repository.SongRepository;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-
+@Slf4j
 @Service
 public class SongServiceImpl implements SongService {
 
@@ -22,15 +23,18 @@ public class SongServiceImpl implements SongService {
     @Override
     public Song createSong(Song song) {
         Long id = song.getId();
+        log.info("Creating song with ID: {}", id);
         if (id != null && songRepository.existsById(id)) {
             throw new DuplicatedMetadataException("Metadata for resource ID=" + id + " already exists");
         }
         Song createdSong = songRepository.save(song);
+        log.info("Song created with ID: {}", createdSong.getId());
         return createdSong;
     }
 
     @Override
     public Optional<Song> getSongById(Long id) {
+        log.info("Fetching song with ID: {}", id);
         if (id <= 0) {
             throw new InvalidIdException(
                     "Invalid value '" + id + "' for ID. Must be a positive integer");
@@ -40,6 +44,7 @@ public class SongServiceImpl implements SongService {
 
     @Override
     public List<Long> deleteSongByIds(String songIds) {
+        log.info("Deleting songs with IDs: {}", songIds);
 
         if (songIds.length() > 200) {
             throw new InvalidIdException(
@@ -70,6 +75,7 @@ public class SongServiceImpl implements SongService {
                 .toList();
 
         songRepository.deleteAllById(deletedIds);
+        log.info("Deleted songs with IDs: {}", deletedIds);
         return deletedIds;
     }
     
