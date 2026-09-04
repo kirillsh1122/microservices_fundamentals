@@ -63,16 +63,14 @@ eureka:
 
 resilience4j.circuitbreaker:
   instances:
-    storage-service:
-      registerHealthIndicator: true
-      ringBufferSizeInClosedState: 5
-      ringBufferSizeInHalfOpenState: 3
-      waitDurationInOpenState: 10s
+    StorageServiceClientgetAllStorageEntriesByTypeString:
+      slidingWindowType: COUNT_BASED
+      slidingWindowSize: 5
+      minimumNumberOfCalls: 5
       failureRateThreshold: 50
-      recordExceptions:
-        - feign.RetryableException
-        - feign.FeignException
-      ignoreExceptions:
+      waitDurationInOpenState: 10s
+      permittedNumberOfCallsInHalfOpenState: 3
+      registerHealthIndicator: true
 
 management:
   endpoints:
