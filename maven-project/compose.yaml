@@ -308,6 +308,8 @@ services:
     depends_on:
       eureka-server:
         condition: service_healthy
+      logstash:
+        condition: service_healthy
 
   storage-client:
     build:
@@ -331,4 +333,6 @@ services:
       storage-service:
         condition: service_healthy
       auth-server:
+        condition: service_healthy
+      logstash:
         condition: service_healthy
